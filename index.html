@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noob piece</title>
+<style>
+:root {
+  --bg: #0d0e14;
+  --panel: #151721;
+  --line: #292c3b;
+  --text: #f4f5ff;
+  --muted: #a4a8bd;
+  --accent: #8b5cf6;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+header {
+  height: 68px;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  background: #101118;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.logo { font-size: 21px; font-weight: 900; }
+.logo span { color: var(--accent); }
+header a {
+  color: var(--muted);
+  text-decoration: none;
+}
+main { max-width: 1100px; margin: auto; padding: 32px 20px 70px; }
+.hero {
+  padding: 42px 25px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(135deg,#21183a,#151721 65%);
+  text-align: center;
+}
+.tag {
+  color: #c4b5fd;
+  font-size: 12px;
+  letter-spacing: 2px;
+  font-weight: bold;
+}
+h1 { font-size: clamp(30px,6vw,48px); margin: 15px 0; }
+.hero p { color: var(--muted); line-height: 1.6; }
+.search {
+  display: block;
+  width: min(100%, 560px);
+  margin: 25px auto 0;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid #414258;
+  background: #101118;
+  color: white;
+  font-size: 16px;
+  outline: none;
+}
+.search:focus { border-color: var(--accent); }
+h2 { font-size: 23px; margin: 36px 0 16px; }
+.categories {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.filter {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  border-radius: 20px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+.filter.active, .filter:hover {
+  color: white;
+  border-color: var(--accent);
+  background: #30204e;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 16px;
+}
+.card {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--panel);
+  padding: 20px;
+  cursor: pointer;
+  transition: .2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+.card .symbol { font-size: 29px; }
+.card h3 { margin: 15px 0 8px; }
+.card p { color: var(--muted); line-height: 1.5; font-size: 14px; }
+.card small { color: #b9a2ff; }
+.empty { color: var(--muted); padding: 25px 0; }
+.article {
+  margin-top: 28px;
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  line-height: 1.8;
+}
+.article h2 { margin-top: 0; }
+.article p, .article li { color: #c4c7d6; }
+.article button {
+  padding: 10px 15px;
+  background: #30204e;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+footer {
+  border-top: 1px solid var(--line);
+  padding: 25px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ROBLOX <span>WIKI</span></div>
+  <a href="#inicio">Início</a>
+</header>
+
+<main id="inicio">
+  <section class="hero">
+    <div class="tag">SUA ENCICLOPÉDIA ROBLOX</div>
+    <h1>Explore o universo Roblox.</h1>
+    <p>Guias, sistemas, tutoriais e informações sobre seus jogos favoritos.</p>
+    <input id="search" class="search"
+      placeholder="Pesquisar artigos..."
+      aria-label="Pesquisar artigos">
+  </section>
+
+  <h2>Categorias</h2>
+  <div class="categories" id="filters">
+    <button class="filter active" data-category="Todas">Todas</button>
+    <button class="filter" data-category="Studio">Roblox Studio</button>
+    <button class="filter" data-category="Lua">Lua</button>
+    <button class="filter" data-category="Jogos">Jogos</button>
+    <button class="filter" data-category="Guias">Guias</button>
+  </div>
+
+  <h2>Artigos da Wiki</h2>
+  <section id="articles" class="grid"></section>
+  <p id="empty" class="empty" hidden>Nenhum artigo encontrado.</p>
+
+  <section id="reader" class="article" hidden>
+    <button id="back">← Voltar aos artigos</button>
+    <div id="articleContent"></div>
+  </section>
+</main>
+
+<footer>
+  Roblox Wiki — Projeto independente criado por Jax.
+  <br>Não afiliado oficialmente à Roblox Corporation.
+</footer>
+
+<script>
+const articles = [
+  {
+    title: "O que é Roblox Studio?",
+    category: "Studio",
+    icon: "🛠️",
+    description: "Conheça a ferramenta de criação de jogos.",
+    content: `
+      <p>Roblox Studio é a ferramenta usada para criar experiências
+      no Roblox. Nela você constrói mapas, cria interfaces e programa
+      sistemas para o seu jogo.</p>
+      <h3>O que você pode criar?</h3>
+      <ul>
+        <li>Mapas e construções.</li>
+        <li>Interfaces gráficas (GUI).</li>
+        <li>NPCs, lojas e sistemas de moedas.</li>
+        <li>Scripts usando Luau.</li>
+      </ul>
+      <p>Site oficial:
+      <a href="https://create.roblox.com/" target="_blank"
+      rel="noopener">Creator Hub</a>.</p>`
+  },
+  {
+    title: "Introdução ao Luau",
+    category: "Lua",
+    icon: "💻",
+    description: "Aprenda a linguagem de programação do Roblox.",
+    content: `
+      <p>Luau é a linguagem de programação utilizada no Roblox.
+      Ela permite controlar o comportamento dos objetos e jogadores.</p>
+      <h3>Seu primeiro código</h3>
+      <pre><code>print("Olá, Roblox!")</code></pre>
+      <p>Coloque esse código em um Script no Roblox Studio e abra
+      a janela Output para ver a mensagem.</p>`
+  },
+  {
+    title: "Como criar uma Part",
+    category: "Studio",
+    icon: "🧱",
+    description: "Aprenda a adicionar um bloco ao mapa.",
+    content: `
+      <p>Uma Part é uma peça básica que pode ser usada na construção
+      de mapas e sistemas.</p>
+      <ol>
+        <li>Abra o Roblox Studio.</li>
+        <li>Crie um projeto Baseplate.</li>
+        <li>Abra a aba Home ou Model.</li>
+        <li>Clique em Part para inserir um bloco.</li>
+        <li>Use as ferramentas Move, Scale e Rotate.</li>
+      </ol>`
+  },
+  {
+    title: "Como criar uma GUI",
+    category: "Guias",
+    icon: "🖥️",
+    description: "Monte interfaces para os jogadores.",
+    content: `
+      <p>GUI é a interface gráfica exibida na tela do jogador.</p>
+      <ol>
+        <li>Abra StarterGui no Explorer.</li>
+        <li>Adicione um ScreenGui.</li>
+        <li>Dentro dele, crie um TextButton.</li>
+        <li>Personalize o tamanho, a posição e o texto.</li>
+      </ol>
+      <p>Você pode adicionar LocalScripts para controlar
+      as interações da interface.</p>`
+  },
+  {
+    title: "O que é um NPC?",
+    category: "Jogos",
+    icon: "🤖",
+    description: "Entenda os personagens controlados pelo jogo.",
+    content: `
+      <p>NPC significa personagem não jogável. Ele pode conversar
+      com o jogador, oferecer missões ou participar de combates.</p>
+      <h3>Exemplos de sistemas</h3>
+      <ul>
+        <li>NPC que entrega missões.</li>
+        <li>Inimigo que persegue jogadores.</li>
+        <li>Personagem que vende itens.</li>
+      </ul>`
+  },
+  {
+    title: "Como funciona o DataStore",
+    category: "Lua",
+    icon: "💾",
+    description: "Aprenda o conceito de salvamento de dados.",
+    content: `
+      <p>DataStoreService permite que um jogo salve dados entre
+      diferentes sessões, como moedas e níveis.</p>
+      <p>Para usar o serviço, é necessário programar a lógica
+      de carregamento, salvamento e tratamento de erros.</p>
+      <p>Teste os recursos de DataStore seguindo a documentação
+      oficial do Creator Hub.</p>`
+  }
+];
+
+let category = "Todas";
+const search = document.getElementById("search");
+const list = document.getElementById("articles");
+const empty = document.getElementById("empty");
+const reader = document.getElementById("reader");
+
+function render() {
+  const query = search.value.trim().toLowerCase();
+
+  const filtered = articles.filter(article => {
+    const matchesCategory =
+      category === "Todas" || article.category === category;
+    const text = (
+      article.title + " " +
+      article.description + " " +
+      article.category
+    ).toLowerCase();
+
+    return matchesCategory && text.includes(query);
+  });
+
+  list.innerHTML = "";
+
+  filtered.forEach(article => {
+    const card = document.createElement("article");
+    card.className = "card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.innerHTML = `
+      <div class="symbol">${article.icon}</div>
+      <small>${article.category}</small>
+      <h3></h3>
+      <p></p>
+      <small>LER ARTIGO →</small>
+    `;
+
+    card.querySelector("h3").textContent = article.title;
+    card.querySelector("p").textContent = article.description;
+
+    const open = () => showArticle(article);
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
+      }
+    });
+
+    list.appendChild(card);
+  });
+
+  empty.hidden = filtered.length > 0;
+}
+
+function showArticle(article) {
+  document.getElementById("articleContent").innerHTML = `
+    <small>${article.category}</small>
+    <h2></h2>
+    ${article.content}
+  `;
+  document.querySelector("#articleContent h2").textContent =
+    article.title;
+
+  reader.hidden = false;
+  list.hidden = true;
+  empty.hidden = true;
+  reader.scrollIntoView({ behavior: "smooth" });
+}
+
+function closeArticle() {
+  reader.hidden = true;
+  list.hidden = false;
+  render();
+}
+
+search.addEventListener("input", render);
+
+document.querySelectorAll(".filter").forEach(button => {
+  button.addEventListener("click", () => {
+    category = button.dataset.category;
+
+    document.querySelectorAll(".filter").forEach(item => {
+      item.classList.toggle("active", item === button);
+    });
+
+    closeArticle();
+  });
+});
+
+document.getElementById("back").addEventListener("click", closeArticle);
+
+render();
+</script>
+</body>
+</html>
